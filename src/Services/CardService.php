@@ -6,10 +6,10 @@ use DigiCash\PaymentologySoapTester\FlexpayClient;
 use SimpleXMLElement;
 use Exception;
 
-class CardService
+readonly class CardService
 {
     public function __construct(
-        private readonly FlexpayClient $client
+        private FlexpayClient $client
     ) {}
 
     /**
