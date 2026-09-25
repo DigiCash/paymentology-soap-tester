@@ -6,7 +6,7 @@ use DigiCash\PaymentologySoapTester\FlexpayClient;
 use SimpleXMLElement;
 use Exception;
 
-readonly class CardService extends FlexpayService
+readonly class CardHolderService extends FlexpayService
 {
     public function __construct(
         private FlexpayClient $client
@@ -17,46 +17,46 @@ readonly class CardService extends FlexpayService
      * If $traceId is null, a random UUID v4 will be generated automatically.
      * @throws Exception
      */
-    public function getCard(
-        string $cardId,
-        ?string $traceId = null,
-        string $sessionKey = ''
+    public function getCardholder(
+        string $cardholderId,
+        string $customerId
     ): array {
-        $traceId  = $traceId ?? $this->generateUuid();
+        $traceId  = $this->generateUuid();
 
         $username = htmlspecialchars($this->client->getUsername());
         $password = htmlspecialchars($this->client->getPassword());
-        $cardId   = htmlspecialchars($cardId);
+        $cardholderId   = htmlspecialchars($cardholderId);
         $traceId  = htmlspecialchars($traceId);
+        $customerId = htmlspecialchars($customerId);
 
         $bodyXml = <<<XML
-        <v:getCard>
+        <v:getCardholder>
             <arg0>
                 <clientUsername>{$username}</clientUsername>
                 <clientPassword>{$password}</clientPassword>
                 <traceId>{$traceId}</traceId>
-                <sessionKey>{$sessionKey}</sessionKey>
-                <cardId>{$cardId}</cardId>
+                <customerId>$customerId</customerId>
+                <cardholderId>{$cardholderId}</cardholderId>
             </arg0>
-        </v:getCard>
+        </v:getCardholder>
 XML;
 
         $rawXmlResponse = $this->client->sendSoapRequest($bodyXml);
 
-        return $this->parseGetCardResponse($rawXmlResponse);
+        return $this->parseGetCardholderResponse($rawXmlResponse);
     }
 
     /**
      * Parse raw SOAP XML string into an associative array
      * @throws Exception
      */
-    private function parseGetCardResponse(string $xmlString): array
+    private function parseGetCardholderResponse(string $xmlString): array
     {
         $xml = new SimpleXMLElement($xmlString);
         $xml->registerXPathNamespace('soap', 'http://schemas.xmlsoap.org/soap/envelope/');
         $xml->registerXPathNamespace('ns2', 'http://ws.fnds.co.za/wsdl/v_2_0');
 
-        $result = $xml->xpath('//ns2:getCardResponse/return');
+        $result = $xml->xpath('//ns2:getCardholderResponse/return');
 
         if (empty($result)) {
             throw new \RuntimeException('Unable to parse XML response body or return element missing.');
